@@ -2,10 +2,18 @@ import Vue from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
+import Vuesax from 'vuesax'
 
-Vue.config.productionTip = false
+import 'vuesax/dist/vuesax.css'
 
-new Vue({
+Vue.config.productionTip = false;
+
+Vue.use(Vuesax);
+let app = new Vue({
   router,
   render: h => h(App)
-}).$mount('#app')
+});
+
+app.$mount('#app');
+
+app.$vs.theme = "dark";

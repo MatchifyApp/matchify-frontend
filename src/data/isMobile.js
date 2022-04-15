@@ -1,0 +1,1 @@
+export const isMobile = matchMedia("screen and (max-width: 800px)").matches;

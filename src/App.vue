@@ -1,32 +1,107 @@
 <template>
-  <div id="app">
+  <div id="app" vs-theme="dark">
     <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <vs-sidebar
+        absolute
+        v-model="activeItem"
+        open
+        reduce
+        :hoverExpand="!isMobile"
+        >
+        <template #logo>
+          <matchify-icon :size="4"></matchify-icon>
+        </template>
+        <vs-sidebar-item id="home" to="/">
+          <template #icon>
+            <i class="ri-home-2-line"></i>
+          </template>
+          Home
+        </vs-sidebar-item>
+        <vs-sidebar-group>
+          <template #header>
+            <vs-sidebar-item arrow>
+              <template #icon>
+                <i class="ri-list-check"></i>
+              </template>
+              Lists
+            </vs-sidebar-item>
+          </template>
+
+          <vs-sidebar-item id="tracks" to="/tracks">
+            <template #icon>
+              <i class="ri-disc-line"></i>
+            </template>
+            Tracks
+          </vs-sidebar-item>
+
+          <vs-sidebar-item id="albums" to="/albums">
+            <template #icon>
+              <i class="ri-album-line"></i>
+            </template>
+            Albums
+          </vs-sidebar-item>
+
+          <vs-sidebar-item id="artists" to="/artists">
+            <template #icon>
+              <i class="ri-user-search-line"></i>
+            </template>
+            Artists
+          </vs-sidebar-item>
+
+          <vs-sidebar-item id="users" to="/users">
+            <template #icon>
+              <i class="ri-group-line"></i>
+            </template>
+            Users
+          </vs-sidebar-item>
+        </vs-sidebar-group>
+        <template #footer>
+          <router-link :to="userData.currentUser ? '/me' : '/login'">
+            <vs-avatar>
+              <img v-if="userData.currentUser" :src="`https://cdn.discordapp.com/avatars/${userData.currentUser.userId}/${userData.currentUser.userAvatar}.png?size=128`" alt="">
+              <i v-if="!userData.currentUser" class="ri-login-circle-line"></i>
+            </vs-avatar>
+          </router-link>
+        </template>
+      </vs-sidebar>
+
     </nav>
-    <router-view/>
+    <div class="router-view">
+      <router-view/>
+    </div>
   </div>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import { isMobile } from "@/data/isMobile";
+import userData from "@/data/user";
+import MatchifyIcon from "./components/MatchifyIcon.vue";
 
-nav {
-  padding: 30px;
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+export default {
+  components: { MatchifyIcon },
+  data() {
+    return {
+      activeItem: "home",
+      isMobile,
+      userData
     }
+  },
+  created() {
+    let token = localStorage.getItem("token");
+    if (!token) return;
+    userData.loginUser(token);
   }
+}
+</script>
+
+<style lang="scss">
+@import url("./styles/main.scss");
+
+.router-view {
+  width: 100%;
+  height: 100%;
+
+  padding-left: 66px;
 }
 </style>
