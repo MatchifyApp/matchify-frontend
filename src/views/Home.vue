@@ -37,6 +37,12 @@
                 {{ track.trackListenerCount }}
               </span>
             </vs-button>
+            <vs-button shadow primary>
+              <i class="ri-music-line"></i>
+              <span style="padding-left: 8px;">
+                {{ track.trackTotalListenCount }}
+              </span>
+            </vs-button>
           </template>
         </vs-card>
       </router-link>
