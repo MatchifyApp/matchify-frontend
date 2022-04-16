@@ -56,6 +56,9 @@ export default {
     return {
       userData
     }
+  },
+  created() {
+    document.title = `Me - Matchify`;
   }
 }
 </script>

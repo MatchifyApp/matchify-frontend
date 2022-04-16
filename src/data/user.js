@@ -3,6 +3,7 @@ import chillout from "chillout";
 
 export default {
   currentUser: null,
+  userId: null,
   async awaitCurrentUser() {
     if (localStorage.getItem("token")) {
       await chillout.waitUntil(() => this.currentUser ? chillout.StopIteration : null);
@@ -16,8 +17,10 @@ export default {
     if (!loginResponse.ok) throw loginResponse.error;
     localStorage.setItem("token", token);
     this.currentUser = loginResponse.data;
+    this.userId = this.currentUser.userId;
 
     socket.on("user:event", ({ data }) => {
+      if (data.userId != this.userId) return;
       this.currentUser = { ...(this.currentUser || {}), ...data.user };
     });
 

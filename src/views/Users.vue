@@ -1,40 +1,35 @@
 <template>
   <div class="home">
     <div class="title-container">
-      <h1 class="title">Popular Tracks</h1>
+      <h1 class="title">Users</h1>
+      <search-input v-model="query"></search-input>
     </div>
     <div class="items">
-      <router-link v-for="track in tracks" :key="track.trackId" class="item" :to="`/track/${track.trackId}`">
+      <router-link v-for="user in visibleUsers" :key="user.userId" class="item" :to="`/user/${user.userId}`">
         <vs-card>
           <template #title>
             <div class="title">
               <div class="name">
                 <div class="text">
-                  <span>{{ track.trackName }}</span>
+                  <span>{{ user.userTag }}</span>
                 </div>
               </div>
             </div>
           </template>
           <template #img>
-            <div class="img" :style="`background-image: url('https://i.scdn.co/image/${track.trackAlbumArtwork}');`"></div>
+            <div class="img" :style="`background-image: url('${getUserAvatar(user)}');`"></div>
           </template>
           <template #text>
             <div class="description">
-              <p class="half-opacity" style="padding-bottom: 5px;">
-                <router-link class="artist" :to="`/artist/${track.trackArtists[0].id}`">{{ track.trackArtists[0].name }}</router-link>
-              </p>
-              <vs-avatar-group max="3" style="justify-content: flex-end; height: 32px;">
-                <vs-avatar v-for="user in track.trackSampleListeners" :key="user.userId" size="36" :title="user.userTag">
-                  <img :src="`https://cdn.discordapp.com/avatars/${user.userId}/${user.userAvatar}.png?size=1024`">
-                </vs-avatar>
-              </vs-avatar-group>
+              <p v-if="user.currentTrack">{{user.currentTrack.trackTitle}}</p>
+              <p v-else></p>
             </div>
           </template>
           <template #interactions>
             <vs-button shadow primary>
-              <i class="ri-group-line"></i>
+              <i class="ri-music-line"></i>
               <span style="padding-left: 8px;">
-                {{ track.trackListenerCount }}
+                {{ user.totalListenCount }}
               </span>
             </vs-button>
           </template>
@@ -50,14 +45,27 @@
   .title-container {
     width: 100%;
     padding: 16px 8px;
-    
+    display: flex;
+    align-items: center;
+
+    .title {
+      margin-right: 32px;
+    }
+
+    .search-input {
+      padding: 0 16px;
+    }
   }
 
   @media screen and (max-width: 1100px) {
     .title-container {
-      text-align: center;
+      flex-direction: column;
     }
 
+    .title {
+      margin-right: 0px;
+      margin-bottom: 16px;
+    }
   }
 
   .items {
@@ -120,28 +128,56 @@
 <script>
 import socket from "@/socket";
 import _ from "lodash";
+import SearchInput from "../components/SearchInput.vue";
+
+import { getUserAvatar } from "@/utils/getUserAvatar";
 
 export default {
   data() {
     return {
-      tracks: []
+      users: [],
+      sampleUsers: [],
+      query: ""
+    };
+  },
+  methods: {
+    getUserAvatar
+  },
+  computed: {
+    visibleUsers() {
+      return this.query.trim() ? this.users : this.sampleUsers;
     }
   },
-  created() {
-    document.title = "Home - Matchify";
-    let notif = this.$vs.notification({ loading: true, color: "dark" });
-
-    socket.on("loops:popularTracks", ({ data }) => {
-      this.tracks = data.map(i => ({ ...i, trackSampleListeners: _.shuffle(i.trackListeners), trackListeners: undefined }));
-      if (notif) {
+  watch: {
+    query: _.debounce(function(q) {
+      q = q.trim();
+      history.replaceState({}, "", `/users${q ? `?q=${q}` : ''}`);
+      socket.emit("user:search:unsubscribe");
+      if (!q) return;
+      this.users = [];
+      let notif = this.$vs.notification({ loading: true, color: "dark" });
+      socket.emit("user:search:subscribe", { search: q });
+      socket.once("user:search", () => {
         notif.close();
-        notif = null;
-      }
+      });
+    }, 500)
+  },
+  created() {
+    this.query = this.$route.query.q || "";
+    document.title = "Users - Matchify";
+    socket.on("loops:sampleUsers", ({data}) => {
+      this.sampleUsers = data;
     });
-    socket.emit("loops:subscribe", { loop: "popularTracks" });
+    socket.on("user:search", ({data}) => {
+      this.users = data.results;
+    });
+
+    socket.emit("loops:subscribe", { loop: "sampleUsers" });
   },
   beforeDestroy() {
-    socket.emit("loops:unsubscribe", { loop: "popularTracks" });
-  }
+    socket.emit("user:search:unsubscribe");
+    socket.emit("loops:unsubscribe", { loop: "sampleUsers" });
+  },
+  components: { SearchInput }
 }
 </script>

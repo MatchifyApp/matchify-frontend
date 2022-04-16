@@ -17,44 +17,39 @@
           </template>
           Home
         </vs-sidebar-item>
-        <vs-sidebar-group>
-          <template #header>
-            <vs-sidebar-item arrow>
-              <template #icon>
-                <i class="ri-list-check"></i>
-              </template>
-              Lists
-            </vs-sidebar-item>
+        <vs-sidebar-item id="tracks" to="/tracks">
+          <template #icon>
+            <i class="ri-disc-line"></i>
           </template>
+          Tracks
+        </vs-sidebar-item>
 
-          <vs-sidebar-item id="tracks" to="/tracks">
-            <template #icon>
-              <i class="ri-disc-line"></i>
-            </template>
-            Tracks
-          </vs-sidebar-item>
+        <vs-sidebar-item id="albums" to="/albums">
+          <template #icon>
+            <i class="ri-album-line"></i>
+          </template>
+          Albums
+        </vs-sidebar-item>
 
-          <vs-sidebar-item id="albums" to="/albums">
-            <template #icon>
-              <i class="ri-album-line"></i>
-            </template>
-            Albums
-          </vs-sidebar-item>
+        <vs-sidebar-item id="artists" to="/artists">
+          <template #icon>
+            <i class="ri-user-search-line"></i>
+          </template>
+          Artists
+        </vs-sidebar-item>
 
-          <vs-sidebar-item id="artists" to="/artists">
-            <template #icon>
-              <i class="ri-user-search-line"></i>
-            </template>
-            Artists
-          </vs-sidebar-item>
-
-          <vs-sidebar-item id="users" to="/users">
-            <template #icon>
-              <i class="ri-group-line"></i>
-            </template>
-            Users
-          </vs-sidebar-item>
-        </vs-sidebar-group>
+        <vs-sidebar-item id="users" to="/users">
+          <template #icon>
+            <i class="ri-group-line"></i>
+          </template>
+          Users
+        </vs-sidebar-item>
+        <vs-sidebar-item id="top" to="/top">
+          <template #icon>
+            <i class="ri-play-list-line"></i>
+          </template>
+          Top 50
+        </vs-sidebar-item>
         <template #footer>
           <router-link :to="userData.currentUser ? '/me' : '/login'">
             <vs-avatar>

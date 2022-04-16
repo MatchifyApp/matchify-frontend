@@ -2,7 +2,7 @@
   <div v-if="user" class="user-page">
     <div class="banner" :style="`--img: ${user.userBanner ? `url('https://cdn.discordapp.com/banners/${user.userId}/${user.userBanner}.${user.userBanner.startsWith('a_') ? 'gif' : 'png'}?size=4096');` : `${bannerColor}`}`"></div>
     <div class="icon-name-container">
-      <div class="icon" :style="`background-image: url('https://cdn.discordapp.com/avatars/${user.userId}/${user.userAvatar}.${user.userAvatar.startsWith('a_') ? 'gif' : 'png'}?size=4096');`"></div>
+      <div class="icon" :style="`background-image: url('${getUserAvatar(user)}?size=4096');`"></div>
       <div class="name-like-container">
         <h3 class="name">{{ user.userTag }}</h3>
         <div class="like" v-if="userData.currentUser">
@@ -15,7 +15,10 @@
         
         <div class="lists">
           <item-list title="History">
-            <track-list-item v-for="track in trackHistory" :track="track" :key="track.trackId"></track-list-item>
+            <track-list-item v-for="(track, i) in trackHistory" :track="track" :key="i"></track-list-item>
+            <static-list-item>
+              <vs-button size="xl" shadow color="dark" @click="loadMoreHistory" :loading="historyLoading">Load More</vs-button>
+            </static-list-item>
           </item-list>
         </div>
       </div>
@@ -59,6 +62,8 @@ import LikeButton from "@/components/LikeButton";
 import { toCapitalCase } from "@/utils/toCapitalCase";
 import ItemList from "@/components/list/ItemList.vue";
 import TrackListItem from "@/components/list/TrackListItem.vue";
+import StaticListItem from "@/components/list/StaticListItem.vue";
+import { getUserAvatar } from "@/utils/getUserAvatar";
 
 export default {
   data() {
@@ -71,11 +76,13 @@ export default {
       likeState: false,
       trackHistory: [],
       extraOffset: 0,
-      historyPage: 1
+      historyPage: 0,
+      historyLoading: false
     }
   },
   methods: {
     toCapitalCase,
+    getUserAvatar,
     like() {
       this.likeState = !this.likeState;
       this.user.totalUsersLikedMe += this.likeState ? 1 : -1;
@@ -83,11 +90,13 @@ export default {
     },
     async loadMoreHistory() {
       const PAGE_SIZE = 20;
+      this.historyLoading = true;
       socket.emit("user:get:history", {
         userId: this.userId,
         offset: this.extraOffset+(PAGE_SIZE*this.historyPage++),
         limit: PAGE_SIZE
       }, ({data})=>{
+        this.historyLoading = false;
         this.trackHistory.push(...data);
       })
     }
@@ -100,10 +109,13 @@ export default {
   components: {
     LikeButton,
     ItemList,
-    TrackListItem
-  },
+    TrackListItem,
+    StaticListItem
+},
   async created() {
     this.userId = this.$route.params.userId;
+
+    let notif = this.$vs.notification({ loading: true, color: "dark" });
 
     await userData.awaitCurrentUser();
     this.loadMoreHistory();
@@ -116,6 +128,7 @@ export default {
     if (userData.currentUser?.userId == this.userId) {
       this.$watch(()=>userData.currentUser, (user)=>{
         this.user = user;
+        document.title = `${user.userTag} - Matchify`;
         if (user.currentTrack) {
           if (!this.trackHistory?.[0]?.trackId) return;
           if (user.currentTrack?.trackId != this.trackHistory?.[0]?.trackId) {
@@ -129,10 +142,16 @@ export default {
               this.extraOffset++;
             }
         }
+        if (notif) {
+          notif.close();
+          notif = null;
+        }
       });
     } else {
       socket.on("user:event", ({ data }) => {
+        if (data.userId != this.userId) return;
         this.user = data.user;
+        document.title = `${data.user.userTag} - Matchify`;
         if (data.user.currentTrack) {
           if (!this.trackHistory?.[0]?.trackId) return;
           if (data.user.currentTrack?.trackId != this.trackHistory?.[0]?.trackId) {
@@ -146,11 +165,13 @@ export default {
               this.extraOffset++;
             }
         }
+        if (notif) {
+          notif.close();
+          notif = null;
+        }
       });
 
       socket.emit("user:subscribe", { userId: this.userId });
-
-      
     }
 
   },
@@ -220,7 +241,8 @@ export default {
       flex-direction: column;
       width: 100%;
       height: 100vh;
-
+      margin-top: 32px;
+      padding: 0 32px;
     }
 
     .right {
@@ -231,10 +253,10 @@ export default {
       padding-right: 32px;
 
       .info-card {
-        margin-top: 28px;
+        margin-top: 1.75em;
         background-color: rgb(var(--vs-gray-2));
-        border-radius: 28px;
-        padding: 28px;
+        border-radius: 1.75em;
+        padding: 1.75em;
         max-width: 400px;
 
         .lines {
@@ -245,12 +267,12 @@ export default {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 1.125em;
+            margin-bottom: .625em;
 
             i {
-              font-size: 24px;
-              margin-right: 8px;
+              font-size: 1.5em;
+              margin-right: .5em;
             }
           }
 
@@ -262,13 +284,13 @@ export default {
           flex-wrap: wrap;
           justify-content: flex-start;
           width: 100%;
-          margin-top: 16px;
+          margin-top: 1em;
 
           .genre {
             background-color: rgb(var(--vs-gray-4));
             border-radius: 9999px;
-            padding: 6px;
-            font-size: 12px;
+            padding: .375em;
+            font-size: .75em;
             color: #f1f1f1;
             margin-right: 4px;
             margin-bottom: 4px;
@@ -279,7 +301,7 @@ export default {
             }
 
             .amount {
-              margin-left: 4px;
+              margin-left: .25em;
               font-weight: 500;
             }
           }
@@ -290,36 +312,40 @@ export default {
 
   @media screen and (max-width: 1100px) {
     .icon-name-container {
-          --icon-size: 175px;
-          flex-direction: column;
-          padding: 0px 0px;
-          justify-content: center;
+      --icon-size: 175px;
+      flex-direction: column;
+      padding: 0px 0px;
+      justify-content: center;
 
-          .name-like-container {
-            margin-top: 8px;
-            flex-direction: column;
-            align-items: center;
+      .name-like-container {
+        margin-top: 8px;
+        flex-direction: column;
+        align-items: center;
 
-            .name {
-              margin-top: 16px;
-              margin-left: 0px;
-              font-size: 32px;
-            }
-
-            .like {
-              margin-top: 16px;
-            }
-          }
-
+        .name {
+          margin-top: 16px;
+          margin-left: 0px;
+          font-size: 32px;
         }
 
+        .like {
+          margin-top: 16px;
+        }
+      }
+
+    }
+
     .content {
-      flex-direction: column;
+      flex-direction: column-reverse;
 
       .right {
         width: 100%;
         padding-right: 0px;
-        
+
+        .info-card {
+          margin-right: 16px;
+          font-size: 14px;
+        }
       }
     }
   }
