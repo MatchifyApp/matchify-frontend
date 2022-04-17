@@ -11,9 +11,11 @@
     "chillout": "^5.0.0",
     "core-js": "^3.8.3",
     "fast-average-color": "^7.1.0",
+    "gsap": "^3.10.3",
     "lodash": "^4.17.21",
     "register-service-worker": "^1.7.2",
     "socket.io-client": "^4.4.1",
+    "stuffs": "^0.1.12",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1",
     "vuesax": "^4.0.1-alpha.25"

@@ -1,46 +1,19 @@
 <template>
-  <div class="home">
+  <div class="users">
     <div class="title-container">
       <h1 class="title">Users</h1>
       <search-input v-model="query"></search-input>
     </div>
     <div class="items">
-      <router-link v-for="user in visibleUsers" :key="user.userId" class="item" :to="`/user/${user.userId}`">
-        <vs-card>
-          <template #title>
-            <div class="title">
-              <div class="name">
-                <div class="text">
-                  <span>{{ user.userTag }}</span>
-                </div>
-              </div>
-            </div>
-          </template>
-          <template #img>
-            <div class="img" :style="`background-image: url('${getUserAvatar(user)}');`"></div>
-          </template>
-          <template #text>
-            <div class="description">
-              <p v-if="user.currentTrack">{{user.currentTrack.trackTitle}}</p>
-              <p v-else></p>
-            </div>
-          </template>
-          <template #interactions>
-            <vs-button shadow primary>
-              <i class="ri-music-line"></i>
-              <span style="padding-left: 8px;">
-                {{ user.totalListenCount }}
-              </span>
-            </vs-button>
-          </template>
-        </vs-card>
+      <router-link v-for="user in visibleUsers" :key="user.userId" :to="`/user/${user.userId}`">
+        <user-card :data="user"></user-card>
       </router-link>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.home {
+.users {
 
   .title-container {
     width: 100%;
@@ -74,53 +47,6 @@
     flex-wrap: wrap;
     width: 100%;
     height: 100%;
-
-    .item {
-      padding: 8px;
-      --card-width: 200px;
-      width: 200px;
-
-      .img {
-        width: 200px;
-        height: 200px;
-        background-size: cover;
-        background-position: center;
-      }
-
-      .artist {
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-
-      .title {
-        .name {
-          --name-height: 26px;
-          position: relative;
-          width: calc(var(--card-width) - var(--card-spacing));
-          word-break: none;
-          overflow: hidden;
-          white-space: nowrap;
-          height: var(--name-height);
-
-          .text {
-            z-index: 0;
-            width: calc(var(--card-width) - var(--card-spacing));
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 18px;
-            font-weight: 800;
-
-            &:hover span {
-              display: inline-block;
-              padding-left: 100%;
-              animation: marquee 5s linear infinite;
-            }
-          }
-        }
-      }
-    }
   }
 }
 </style>
@@ -129,8 +55,8 @@
 import socket from "@/socket";
 import _ from "lodash";
 import SearchInput from "../components/SearchInput.vue";
-
 import { getUserAvatar } from "@/utils/getUserAvatar";
+import UserCard from "@/components/card/UserCard.vue";
 
 export default {
   data() {
@@ -155,7 +81,7 @@ export default {
       socket.emit("user:search:unsubscribe");
       if (!q) return;
       this.users = [];
-      let notif = this.$vs.notification({ loading: true, color: "dark" });
+      let notif = this.$vs.notification({ loading: true, color: "dark", duration: "none" });
       socket.emit("user:search:subscribe", { search: q });
       socket.once("user:search", () => {
         notif.close();
@@ -178,6 +104,6 @@ export default {
     socket.emit("user:search:unsubscribe");
     socket.emit("loops:unsubscribe", { loop: "sampleUsers" });
   },
-  components: { SearchInput }
+  components: { SearchInput, UserCard }
 }
 </script>

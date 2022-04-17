@@ -28,7 +28,31 @@ const routes = [
   {
     path: '/users',
     component: () => import('@/views/Users.vue')
-  }
+  },
+  {
+    path: '/track/:trackId',
+    component: () => import('@/views/Track.vue')
+  },
+  {
+    path: '/tracks',
+    component: () => import('@/views/Tracks.vue')
+  },
+  {
+    path: '/album/:albumId',
+    component: () => import('@/views/Album.vue')
+  },
+  {
+    path: '/albums',
+    component: () => import('@/views/Albums.vue')
+  },
+  {
+    path: '/artist/:artistId',
+    component: () => import('@/views/Artist.vue')
+  },
+  {
+    path: '/artists',
+    component: () => import('@/views/Artists.vue')
+  },
 ]
 
 const router = new VueRouter({

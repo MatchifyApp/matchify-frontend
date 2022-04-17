@@ -9,7 +9,9 @@
         :hoverExpand="!isMobile"
         >
         <template #logo>
-          <matchify-icon :size="4"></matchify-icon>
+          <router-link to="/">
+            <matchify-icon :size="4"></matchify-icon>
+          </router-link>
         </template>
         <vs-sidebar-item id="home" to="/">
           <template #icon>
@@ -83,9 +85,25 @@ export default {
     }
   },
   created() {
-    let token = localStorage.getItem("token");
-    if (!token) return;
-    userData.loginUser(token);
+    (()=>{
+      let token = localStorage.getItem("token");
+      if (!token) return;
+      userData.loginUser(token);
+    })();
+
+    (()=>{
+      if (window.location.hostname == "localhost") return;
+      if (window.location.hostname == "matchify.org") {
+        if (window.location.protocol != "https:") {
+          let u = new URL(window.location.href);
+          u.protocol = "https:";
+          window.location.replace(u.href);
+          return;
+        }
+      } else {
+        window.location.replace("https://matchify.org");
+      }
+    })();
   }
 }
 </script>

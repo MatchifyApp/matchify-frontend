@@ -3,53 +3,50 @@
     <div class="banner" :style="`--img: ${user.userBanner ? `url('https://cdn.discordapp.com/banners/${user.userId}/${user.userBanner}.${user.userBanner.startsWith('a_') ? 'gif' : 'png'}?size=4096');` : `${bannerColor}`}`"></div>
     <div class="icon-name-container">
       <div class="icon" :style="`background-image: url('${getUserAvatar(user)}?size=4096');`"></div>
-      <div class="name-like-container">
-        <h3 class="name">{{ user.userTag }}</h3>
-        <div class="like" v-if="userData.currentUser">
-          <like-button :state="likeState" :count="user.totalUsersLikedMe" @click="like"></like-button>
+      <div class="name-controls-container">
+        <div class="name">
+          <h3 class="name-text">
+            <div class="gradient"></div>
+            <div class="text">{{ user.userTag }}</div>
+          </h3>
+          <vs-tooltip color="dark" not-arrow>
+            <a class="add-button" :href="`https://discord.com/users/${user.userId}?referer=matchify.org`" target="_blank">
+              <div class="open">
+                <div class="icon-container">
+                  <svg viewBox="0 0 127.14 96.36">
+                    <g>
+                      <path style="fill:currentColor;" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                    </g>
+                  </svg>
+                  <i class="ri-search-line"></i>
+                </div>
+              </div>
+            </a>
+            <template #tooltip>
+              Open <strong>{{ user.userTag }}</strong> on Discord!
+            </template>
+          </vs-tooltip>
+        </div>
+        <div class="controls">
+          <div class="like" v-if="userData.currentUser">
+            <like-button :state="likeState" :count="user.totalUsersLikedMe" @click="like"></like-button>
+          </div>
         </div>
       </div>
     </div>
     <div class="content">
       <div class="left">
-        
         <div class="lists">
           <item-list title="History">
-            <track-list-item v-for="(track, i) in trackHistory" :track="track" :key="i"></track-list-item>
+            <track-list-item v-for="(track, i) in trackHistory" :track="track" :current-track="user.currentTrack" :show-progress="i === 0" :key="i"></track-list-item>
             <static-list-item>
               <vs-button size="xl" shadow color="dark" @click="loadMoreHistory" :loading="historyLoading">Load More</vs-button>
             </static-list-item>
           </item-list>
         </div>
       </div>
-      <div class="right">
-        <div class="info-card">
-          <div class="lines">
-            <div class="line" v-if="user.currentTrack">
-              <i class="ri-album-fill breath"></i>
-              <p>
-                <router-link :to="`/track/${user.currentTrack.trackId}`">{{ user.currentTrack.trackTitle }}</router-link>
-              </p>
-            </div>
-            <div class="line">
-              <i class="ri-music-2-line"></i>
-              <p>{{ user.totalListenCount }} songs listened</p>
-            </div>
-            <div class="line">
-              <i class="ri-heart-3-line"></i>
-              <p>{{ user.totalUsersLikedMe }} likes</p>
-            </div>
-          </div>
-          <div class="genres">
-            <router-link v-for="genre in genres" class="genre" :key="genre[0]" :to="`/users?q=genre:'${genre[0]}>${genre[1]}'`">
-              <span class="name">{{ toCapitalCase(genre[0].replaceAll("_", " ")) }}</span>
-              <div class="amount">{{ genre[1] }}</div>
-            </router-link>
-            <div class="genre static" @click="showMoreGenres = !showMoreGenres">
-              <div class="name">{{showMoreGenres ? "Less" : "More"}}..</div>
-            </div>
-          </div>
-        </div>
+      <div class="right-side-bar">
+        <RightSidebar type="user" :information="user" />
       </div>
     </div>
   </div>
@@ -59,10 +56,10 @@
 import userData from "@/data/user";
 import socket from "@/socket";
 import LikeButton from "@/components/LikeButton";
-import { toCapitalCase } from "@/utils/toCapitalCase";
 import ItemList from "@/components/list/ItemList.vue";
 import TrackListItem from "@/components/list/TrackListItem.vue";
 import StaticListItem from "@/components/list/StaticListItem.vue";
+import RightSidebar from "@/components/sidebar/RightSidebar.vue";
 import { getUserAvatar } from "@/utils/getUserAvatar";
 
 export default {
@@ -80,22 +77,30 @@ export default {
       historyLoading: false
     }
   },
+  props: {
+    xUserId: {
+      type: String,
+      required: false,
+      default() {
+        return null
+      }
+    }
+  },
   methods: {
-    toCapitalCase,
     getUserAvatar,
     like() {
       this.likeState = !this.likeState;
       this.user.totalUsersLikedMe += this.likeState ? 1 : -1;
-      socket.emit("user:user:like:set", {userId: this.userId, state:this.likeState});
+      socket.emit("user:user:like:set", { userId: this.userId, state: this.likeState });
     },
     async loadMoreHistory() {
       const PAGE_SIZE = 20;
       this.historyLoading = true;
       socket.emit("user:get:history", {
         userId: this.userId,
-        offset: this.extraOffset+(PAGE_SIZE*this.historyPage++),
+        offset: this.extraOffset + (PAGE_SIZE * this.historyPage++),
         limit: PAGE_SIZE
-      }, ({data})=>{
+      }, ({ data }) => {
         this.historyLoading = false;
         this.trackHistory.push(...data);
       })
@@ -110,37 +115,39 @@ export default {
     LikeButton,
     ItemList,
     TrackListItem,
-    StaticListItem
-},
+    StaticListItem,
+    RightSidebar
+  },
   async created() {
-    this.userId = this.$route.params.userId;
+    this.userId = this.xUserId || this.$route.params.userId;
 
-    let notif = this.$vs.notification({ loading: true, color: "dark" });
+    let notif = this.$vs.notification({ loading: true, color: "dark", duration: "none" });
 
     await userData.awaitCurrentUser();
     this.loadMoreHistory();
     if (userData.currentUser) {
-      socket.emit("user:user:like:get", {userId: this.userId}, ({data})=>{
+      socket.emit("user:user:like:get", { userId: this.userId }, ({ data }) => {
         this.likeState = data;
       });
     }
 
     if (userData.currentUser?.userId == this.userId) {
-      this.$watch(()=>userData.currentUser, (user)=>{
+      this.$watch(() => userData.currentUser, (user) => {
         this.user = user;
         document.title = `${user.userTag} - Matchify`;
         if (user.currentTrack) {
           if (!this.trackHistory?.[0]?.trackId) return;
           if (user.currentTrack?.trackId != this.trackHistory?.[0]?.trackId) {
-              this.trackHistory.unshift({
-                trackId: user.currentTrack.trackId,
-                trackAlbumArtwork: user.currentTrack.trackAlbumArtwork,
-                trackName: user.currentTrack.trackName,
-                trackArtists: user.currentTrack.trackArtists,
-                trackAt: user.currentTrack.trackAt,
-              });
-              this.extraOffset++;
-            }
+            this.trackHistory.unshift({
+              trackId: user.currentTrack.trackId,
+              trackAlbumArtwork: user.currentTrack.trackAlbumArtwork,
+              trackName: user.currentTrack.trackName,
+              trackArtists: user.currentTrack.trackArtists,
+              trackAt: user.currentTrack.trackAt,
+              trackDuration: user.currentTrack.trackDuration
+            });
+            this.extraOffset++;
+          }
         }
         if (notif) {
           notif.close();
@@ -155,15 +162,16 @@ export default {
         if (data.user.currentTrack) {
           if (!this.trackHistory?.[0]?.trackId) return;
           if (data.user.currentTrack?.trackId != this.trackHistory?.[0]?.trackId) {
-              this.trackHistory.unshift({
-                trackId: data.user.currentTrack.trackId,
-                trackAlbumArtwork: data.user.currentTrack.trackAlbumArtwork,
-                trackName: data.user.currentTrack.trackName,
-                trackArtists: data.user.currentTrack.trackArtists,
-                trackAt: data.user.currentTrack.trackAt,
-              });
-              this.extraOffset++;
-            }
+            this.trackHistory.unshift({
+              trackId: data.user.currentTrack.trackId,
+              trackAlbumArtwork: data.user.currentTrack.trackAlbumArtwork,
+              trackName: data.user.currentTrack.trackName,
+              trackArtists: data.user.currentTrack.trackArtists,
+              trackAt: data.user.currentTrack.trackAt,
+              trackDuration: data.user.currentTrack.trackDuration
+            });
+            this.extraOffset++;
+          }
         }
         if (notif) {
           notif.close();
@@ -217,7 +225,7 @@ export default {
       border-radius: calc(var(--icon-size) / 6);
     }
 
-    .name-like-container {
+    .name-controls-container {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -226,7 +234,96 @@ export default {
 
       .name {
         margin-left: 32px;
-        font-size: 48px;
+        display: flex;
+        align-items: flex-start;
+        
+
+        .name-text {
+          --h: 60px;
+          --w: 500px;
+          height: var(--h);
+          white-space: nowrap;
+          overflow: hidden;
+          position: relative;
+          width: var(--w);
+          font-weight: bold;
+          font-size: 48px;
+          letter-spacing: -0.03em;
+          display: flex;
+
+          &:hover .text {
+            animation: marquee 5s linear infinite;
+            padding-left: 100%;
+          }
+
+          .text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+          }
+
+          .gradient {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 1;
+            pointer-events: none;
+            height: var(--h);
+            width: var(--w);
+            background: linear-gradient(90deg, transparent 0%, transparent 75%, #18191c 100%);
+          }
+
+        }
+
+
+        .open {
+          margin-left: 8px;
+          margin-top: -8px;
+          cursor: pointer;
+          opacity: 0.95;
+
+          &:hover {
+            transform: scale(1.05);
+            opacity: 1;
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+
+          .icon-container {
+            width: 32px;
+            height: 32px;
+            position: relative;
+            filter: drop-shadow(0px 0px 6px black);
+
+            svg {
+              position: absolute;
+              top: calc(50% + 1px);
+              left: calc(50% - 4px);
+              transform: translate(-50%, -50%);
+              width: 50%;
+              height: 50%;
+              color: rgba(255, 255, 255, 1);
+            }
+
+            i {
+              font-size: 38px;
+              position: absolute;
+              top: 0;
+              right: 0;
+              color: rgba(255, 255, 255, 1);
+            }
+          }
+        }
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+
+        
       }
     }
   }
@@ -240,74 +337,11 @@ export default {
       display: flex;
       flex-direction: column;
       width: 100%;
-      height: 100vh;
+      
       margin-top: 32px;
       padding: 0 32px;
     }
 
-    .right {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 400px;
-      padding-right: 32px;
-
-      .info-card {
-        margin-top: 1.75em;
-        background-color: rgb(var(--vs-gray-2));
-        border-radius: 1.75em;
-        padding: 1.75em;
-        max-width: 400px;
-
-        .lines {
-          display: flex;
-          flex-direction: column;
-
-          .line {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            font-size: 1.125em;
-            margin-bottom: .625em;
-
-            i {
-              font-size: 1.5em;
-              margin-right: .5em;
-            }
-          }
-
-        }
-
-        .genres {
-          display: flex;
-          align-items: center;
-          flex-wrap: wrap;
-          justify-content: flex-start;
-          width: 100%;
-          margin-top: 1em;
-
-          .genre {
-            background-color: rgb(var(--vs-gray-4));
-            border-radius: 9999px;
-            padding: .375em;
-            font-size: .75em;
-            color: #f1f1f1;
-            margin-right: 4px;
-            margin-bottom: 4px;
-            display: flex;
-
-            &.static {
-              cursor: pointer;
-            }
-
-            .amount {
-              margin-left: .25em;
-              font-weight: 500;
-            }
-          }
-        }
-      }
-    }
   }
 
   @media screen and (max-width: 1100px) {
@@ -317,7 +351,7 @@ export default {
       padding: 0px 0px;
       justify-content: center;
 
-      .name-like-container {
+      .name-controls-container {
         margin-top: 8px;
         flex-direction: column;
         align-items: center;
@@ -325,10 +359,20 @@ export default {
         .name {
           margin-top: 16px;
           margin-left: 0px;
-          font-size: 32px;
+          .name-text {
+            font-size: 32px;
+            --w: calc(100vw - 200px);
+            --h: 38px;
+
+            .text {
+              animation: marquee 10s linear infinite !important;
+              padding-left: 100%;
+            }
+
+          }
         }
 
-        .like {
+        .controls {
           margin-top: 16px;
         }
       }
