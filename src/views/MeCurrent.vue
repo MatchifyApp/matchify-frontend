@@ -240,7 +240,7 @@ export default {
       width: 100%;
 
       .content {
-        width: 50%;
+        width: 100%;
 
         &:first-child {
           margin-right: 16px;

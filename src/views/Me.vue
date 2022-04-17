@@ -45,11 +45,18 @@
         </vs-card>
       </router-link>
     </div>
+    <div class="buttons">
+      <vs-button color="danger" flat @click="logout">Logout</vs-button>
+      <vs-button color="danger" flat @click="blockMe">Disable My Account</vs-button>
+    </div>
   </div>
 </template>
 
 <script>
 import userData from "@/data/user";
+import router from "@/router";
+import socket from "@/socket";
+import Vue from "vue";
 
 export default {
   data() {
@@ -59,7 +66,26 @@ export default {
   },
   created() {
     document.title = `Me - Matchify`;
-  }
+  },
+  methods: {
+    logout() {
+      userData.logoutUser();
+      window.location.href = "/";
+    },
+    blockMe() {
+      if (prompt("Are you sure about that? All your data going to be deleted! And you are no longer tracked by Matchify!\n\nType 'yes' to confirm.", "no") !== "yes") return;
+      userData.logoutUser();
+      socket.emit("auth:blockMe");
+      router.push("/");
+      Vue.$vs.notification({
+        title: "Account Blocked",
+        text: "Your account has been blocked. All your data has been deleted. And you are no longer tracked by Matchify.",
+        color: "danger",
+        progress: "auto",
+        time: 5000
+      });
+    }
+  },
 }
 </script>
 
@@ -71,24 +97,33 @@ export default {
     height: 100%;
     width: 100%;
     padding: 50px;
+    flex-direction: column;
 
     .cards {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-    }
 
-    .currentTrack-btn {
-      font-size: 0.8rem;
-      i {
-        font-size: 1.2rem;
-        margin-right: 4px;
+      .currentTrack-btn {
+        font-size: 0.8rem;
+        i {
+          font-size: 1.2rem;
+          margin-right: 4px;
+        }
+      }
+
+      .vs-card {
+        margin: 8px;
       }
     }
 
-    .vs-card {
-      margin: 8px;
+    .buttons {
+      margin-top: 8px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
     }
+    
   }
 </style>

@@ -29,9 +29,10 @@ export default {
     return loginResponse.data
   },
   logoutUser() {
-    this.currentUser = null;
-    this.userId = null;
     localStorage.removeItem("token");
     socket.emit("user:unsubscribe", { userId: this.userId });
+    socket.emit("auth:logout");
+    this.currentUser = null;
+    this.userId = null;
   }
 };
