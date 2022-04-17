@@ -38,7 +38,7 @@ export default {
   }
 
   .content {
-    height: 350px;
+    height: 300px;
     overflow: auto;
     contain: content;
     counter-reset: list-item 1;

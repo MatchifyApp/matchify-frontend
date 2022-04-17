@@ -46,12 +46,12 @@
           </template>
           Users
         </vs-sidebar-item>
-        <vs-sidebar-item id="top" to="/top">
+        <!-- <vs-sidebar-item id="top" to="/top">
           <template #icon>
             <i class="ri-play-list-line"></i>
           </template>
           Top 50
-        </vs-sidebar-item>
+        </vs-sidebar-item> -->
         <template #footer>
           <router-link :to="userData.currentUser ? '/me' : '/login'">
             <vs-avatar>

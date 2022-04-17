@@ -22,6 +22,10 @@ const routes = [
     component: () => import('@/views/Me.vue')
   },
   {
+    path: '/me/current',
+    component: () => import('@/views/MeCurrent.vue')
+  },
+  {
     path: '/user/:userId',
     component: () => import('@/views/User.vue')
   },
