@@ -79,7 +79,7 @@ export default {
     like() {
       this.likeState = !this.likeState;
       this.album.albumTotalLikeCount += this.likeState ? 1 : -1;
-      socket.emit("album:user:like:set", { albumId: this.albumId, state: this.likeState });
+      socket.emit("album:current-user:like:set", { albumId: this.albumId, state: this.likeState });
     },
     async loadMoreBefore() {
       this.beforeLoading = true;

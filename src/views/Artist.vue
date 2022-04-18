@@ -89,7 +89,7 @@ export default {
     like() {
       this.likeState = !this.likeState;
       this.artist.artistTotalLikeCount += this.likeState ? 1 : -1;
-      socket.emit("artist:user:like:set", {artistId: this.artistId, state:this.likeState});
+      socket.emit("artist:current-user:like:set", {artistId: this.artistId, state:this.likeState});
     },
     async loadMoreBefore() {
       this.beforeLoading = true;
@@ -123,7 +123,7 @@ export default {
     await userData.awaitCurrentUser();
 
     if (userData.currentUser) {
-      socket.emit("artist:user:like:get", { artistId: this.artistId }, ({ data }) => {
+      socket.emit("artist:current-user:like:get", { artistId: this.artistId }, ({ data }) => {
         this.likeState = data;
       });
     }

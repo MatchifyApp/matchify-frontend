@@ -81,7 +81,7 @@ export default {
     like() {
       this.likeState = !this.likeState;
       this.track.trackTotalLikeCount += this.likeState ? 1 : -1;
-      socket.emit("track:user:like:set", { trackId: this.trackId, state: this.likeState });
+      socket.emit("track:current-user:like:set", { trackId: this.trackId, state: this.likeState });
     },
     async loadMoreBefore() {
       const PAGE_SIZE = 30;
@@ -113,7 +113,7 @@ export default {
     await userData.awaitCurrentUser();
 
     if (userData.currentUser) {
-      socket.emit("track:user:like:get", { trackId: this.trackId }, ({ data }) => {
+      socket.emit("track:current-user:like:get", { trackId: this.trackId }, ({ data }) => {
         this.likeState = data;
       });
     }

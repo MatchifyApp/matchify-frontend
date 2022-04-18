@@ -98,7 +98,7 @@ export default {
     like() {
       this.likeState = !this.likeState;
       this.user.totalUsersLikedMe += this.likeState ? 1 : -1;
-      socket.emit("user:user:like:set", { userId: this.userId, state: this.likeState });
+      socket.emit("user:current-user:like:set", { userId: this.userId, state: this.likeState });
     },
     async loadMoreHistory() {
       const PAGE_SIZE = 20;
@@ -134,7 +134,7 @@ export default {
     await userData.awaitCurrentUser();
     this.loadMoreHistory();
     if (userData.currentUser) {
-      socket.emit("user:user:like:get", { userId: this.userId }, ({ data }) => {
+      socket.emit("user:current-user:like:get", { userId: this.userId }, ({ data }) => {
         this.likeState = data;
       });
       if (userData.isPremium) {

@@ -44,6 +44,23 @@
           </template>
         </vs-card>
       </router-link>
+      <router-link v-if="randomMatch" to="/me/matches">
+        <vs-card>
+          <template #title>
+            <h3>
+              Matches
+            </h3>
+          </template>
+          <template #img>
+            <img :src="`https://i.scdn.co/image/${userData.currentUser.currentTrack.trackAlbumArtwork}`" alt="">
+          </template>
+          <template #text>
+            <p>
+              View your matches!
+            </p>
+          </template>
+        </vs-card>
+      </router-link>
     </div>
     <div class="buttons">
       <vs-button color="danger" flat @click="logout">Logout</vs-button>
@@ -61,11 +78,13 @@ import Vue from "vue";
 export default {
   data() {
     return {
-      userData
+      userData,
+      randomMatch: null,
     }
   },
   created() {
     document.title = `Me - Matchify`;
+    
   },
   methods: {
     logout() {
@@ -79,10 +98,10 @@ export default {
       router.push("/");
       Vue.$vs.notification({
         title: "Account Blocked",
-        text: "Your account has been blocked. All your data has been deleted. And you are no longer tracked by Matchify.",
+        text: "Your account has been blocked. All your data has been deleted. And you are no longer tracked by Matchify. Until you login again.",
         color: "danger",
         progress: "auto",
-        time: 5000
+        time: 10000
       });
     }
   },
@@ -115,6 +134,7 @@ export default {
 
       .vs-card {
         margin: 8px;
+        max-width: 300px;
       }
     }
 

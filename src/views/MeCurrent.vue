@@ -29,6 +29,9 @@
         <item-list title="Artists Listeners" class="content">
           <UserListItem v-for="(user, i) in artistListeners" :user="user" :key="i"></UserListItem>
         </item-list>
+        <item-list title="Matched Before" class="content">
+          <UserListItem v-for="(user, i) in matchedBefore" :user="user" :key="i"></UserListItem>
+        </item-list>
       </div>
     </div>
   </div>
@@ -49,7 +52,8 @@ export default {
       artistListeners: null,
       userData,
       lastTrackId: null,
-      renderTrackView: false
+      renderTrackView: false,
+      matchedBefore: [],
     };
   },
   methods: {
@@ -86,6 +90,10 @@ export default {
         });
       });
       this.lastTrackId = newValue.trackId;
+    },
+    addToMatchesIfCan(user) {
+      if (this.matchedBefore.some(i=>i.userId == user.userId)) return;
+      this.matchedBefore.unshift(user);
     }
   },
   async created() {
@@ -93,6 +101,8 @@ export default {
     await userData.awaitCurrentUser();
     if (!userData.currentUser)
       return;
+    
+    let self = this;
     let notif = this.$vs.notification({ loading: true, color: "dark", duration: "none" });
     this.$watch(() => userData.currentUser.currentTrack, (newValue, oldValue) => {
       this.subscribe(newValue, oldValue);
@@ -104,15 +114,18 @@ export default {
     socket.on("album:event", ({ data }) => {
       this.albumListeners = data.album.albumListeners;
     });
-    let self = this;
     let artistListeners = new Map();
     let artistDebounce = _.debounce(function() {
-      self.artistListeners = [...artistListeners.values()];
+      let users = [...artistListeners.values()];
+      self.artistListeners = users;
       artistListeners = new Map();
       if (notif) {
         notif.close();
         notif = null;
       }
+      users.forEach((user)=>{
+        self.addToMatchesIfCan(user)
+      });
     }, 500);
     socket.on("artist:event", ({ data }) => {
       data.artist.artistListeners.forEach(user => {
