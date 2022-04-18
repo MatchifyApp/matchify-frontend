@@ -11,6 +11,9 @@ export default {
     }
     return null;
   },
+  get isPremium() {
+    return ((this.currentUser?.userPremiumUntil || 0) > Date.now());
+  },
   async loginUser(token) {
     if (this.currentUser) throw "Already logged in";
     let loginResponse = await new Promise(r => socket.emit("auth:login", { token: token }, r));

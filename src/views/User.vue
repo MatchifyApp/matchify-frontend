@@ -1,6 +1,6 @@
 <template>
   <div v-if="user" class="user-page">
-    <div class="banner" :style="`--img: ${user.userBanner ? `url('https://cdn.discordapp.com/banners/${user.userId}/${user.userBanner}.${user.userBanner.startsWith('a_') ? 'gif' : 'png'}?size=4096');` : `${bannerColor}`}`"></div>
+    <div class="banner" :style="user.userBanner ? `--img: url('https://cdn.discordapp.com/banners/${user.userId}/${user.userBanner}.${user.userBanner.startsWith('a_') ? 'gif' : 'png'}?size=4096');` : ``"></div>
     <div class="icon-name-container">
       <div class="icon" :style="`background-image: url('${getUserAvatar(user)}?size=4096');`"></div>
       <div class="name-controls-container">
@@ -37,12 +37,17 @@
     <div class="content">
       <div class="left">
         <div class="lists">
-          <item-list title="History">
-            <track-list-item v-for="(track, i) in trackHistory" :track="track" :current-track="user.currentTrack" :show-progress="i === 0" :key="i"></track-list-item>
-            <static-list-item>
-              <vs-button size="xl" shadow color="dark" @click="loadMoreHistory" :loading="historyLoading">Load More</vs-button>
-            </static-list-item>
-          </item-list>
+          <div class="row">
+            <item-list title="History">
+              <track-list-item v-for="(track, i) in trackHistory" :track="track" :current-track="user.currentTrack" :show-progress="i === 0" :key="i"></track-list-item>
+              <static-list-item>
+                <vs-button size="xl" shadow color="dark" @click="loadMoreHistory" :loading="historyLoading">Load More</vs-button>
+              </static-list-item>
+            </item-list>
+            <item-list v-if="userData.isPremium" title="Guilds">
+              <GuildMemberListItem v-for="(member, i) in guildUsers" :member="member" :key="i"></GuildMemberListItem>
+            </item-list>
+          </div>
         </div>
       </div>
       <div class="right-side-bar">
@@ -61,6 +66,7 @@ import TrackListItem from "@/components/list/TrackListItem.vue";
 import StaticListItem from "@/components/list/StaticListItem.vue";
 import RightSidebar from "@/components/sidebar/RightSidebar.vue";
 import { getUserAvatar } from "@/utils/getUserAvatar";
+import GuildMemberListItem from "@/components/list/GuildMemberListItem.vue";
 
 export default {
   data() {
@@ -72,6 +78,7 @@ export default {
       showMoreGenres: false,
       likeState: false,
       trackHistory: [],
+      guildUsers: [],
       extraOffset: 0,
       historyPage: 0,
       historyLoading: false
@@ -116,7 +123,8 @@ export default {
     ItemList,
     TrackListItem,
     StaticListItem,
-    RightSidebar
+    RightSidebar,
+    GuildMemberListItem
   },
   async created() {
     this.userId = this.xUserId || this.$route.params.userId;
@@ -129,6 +137,11 @@ export default {
       socket.emit("user:user:like:get", { userId: this.userId }, ({ data }) => {
         this.likeState = data;
       });
+      if (userData.isPremium) {
+        socket.emit("user:get:guild-users", { userId: this.userId }, ({ data }) => {
+          this.guildUsers = data;
+        });
+      }
     }
 
     if (userData.currentUser?.userId == this.userId) {
@@ -337,11 +350,25 @@ export default {
       display: flex;
       flex-direction: column;
       width: 100%;
-      
       margin-top: 32px;
       padding: 0 32px;
-    }
 
+      .lists {
+        display: flex;
+        flex-direction: column;
+
+        .row {
+          display: flex;
+          margin-bottom: 16px;
+          .item-list {
+            width: 100%;
+            &:first-child {
+              margin-right: 16px;
+            }
+          }
+        }
+      }
+    }
   }
 
   @media screen and (max-width: 1100px) {
@@ -382,13 +409,19 @@ export default {
     .content {
       flex-direction: column-reverse;
 
-      .right {
-        width: 100%;
-        padding-right: 0px;
-
-        .info-card {
-          margin-right: 16px;
-          font-size: 14px;
+      .left {
+        .lists {
+          display: flex;
+          flex-direction: column-reverse;
+          .row {
+            flex-direction: column;
+            .item-list {
+              width: 100%;
+              &:first-child {
+                margin-right: 0px;
+              }
+            }
+          }
         }
       }
     }
