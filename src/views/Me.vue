@@ -1,5 +1,5 @@
 <template>
-  <div class="me-page">
+  <div v-if="userData.currentUser" class="me-page">
     <div class="cards">
       <router-link :to="`/user/${userData.currentUser.userId}`">
         <vs-card>
@@ -12,7 +12,7 @@
             </h3>
           </template>
           <template #img>
-            <img :src="`https://cdn.discordapp.com/avatars/${userData.currentUser.userId}/${userData.currentUser.userAvatar}.png?size=1024`" alt="">
+            <img :src="`${getUserAvatar(userData.currentUser)}?size=512`" alt="">
           </template>
           <template #text>
             <p>
@@ -44,7 +44,7 @@
           </template>
         </vs-card>
       </router-link>
-      <router-link v-if="randomMatch" to="/me/matches">
+      <router-link v-if="randomMatch" :to="`/user/${randomMatch.userId}`">
         <vs-card>
           <template #title>
             <h3>
@@ -52,11 +52,11 @@
             </h3>
           </template>
           <template #img>
-            <img :src="`https://i.scdn.co/image/${userData.currentUser.currentTrack.trackAlbumArtwork}`" alt="">
+            <img :src="getUserAvatar(randomMatch)" alt="">
           </template>
           <template #text>
             <p>
-              View your matches!
+              Click here to see your random match!
             </p>
           </template>
         </vs-card>
@@ -73,20 +73,40 @@
 import userData from "@/data/user";
 import router from "@/router";
 import socket from "@/socket";
+import { getUserAvatar } from "@/utils/getUserAvatar";
 import Vue from "vue";
+
+
 
 export default {
   data() {
     return {
       userData,
       randomMatch: null,
+      matchCheckInterval: null
     }
   },
-  created() {
+  async created() {
     document.title = `Me - Matchify`;
-    
+
+    await userData.awaitCurrentUser()
+    if (!userData.currentUser) return;
+
+    this.checkMatches();
+    this.matchCheckInterval = setInterval(()=>{
+      this.checkMatches();
+    }, 5000);
+  },
+  beforeDestroy() {
+    clearInterval(this.matchCheckInterval);
   },
   methods: {
+    getUserAvatar,
+    checkMatches() {
+      socket.emit("current-user:get:matches", {size: 1}, ({data})=>{
+        this.randomMatch = data.length > 0 ? data[0] : null;
+      });
+    },
     logout() {
       userData.logoutUser();
       window.location.href = "/";

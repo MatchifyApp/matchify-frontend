@@ -57,6 +57,10 @@ const routes = [
     path: '/artists',
     component: () => import('@/views/Artists.vue')
   },
+  {
+    path: '/feed',
+    component: () => import('@/views/Feed.vue')
+  },
 ]
 
 const router = new VueRouter({
