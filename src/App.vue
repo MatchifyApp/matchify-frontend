@@ -97,19 +97,19 @@ export default {
       userData.loginUser(token);
     })();
 
-    // (()=>{
-    //   if (window.location.hostname == "localhost" || window.location.hostname == "armagan.playit.gg") return;
-    //   if (window.location.hostname == "matchify.org") {
-    //     if (window.location.protocol != "https:") {
-    //       let u = new URL(window.location.href);
-    //       u.protocol = "https:";
-    //       window.location.replace(u.href);
-    //       return;
-    //     }
-    //   } else {
-    //     window.location.replace("https://matchify.org");
-    //   }
-    // })();
+    (()=>{
+      if (window.location.hostname == "localhost" || window.location.hostname == "armagan.playit.gg") return;
+      if (window.location.hostname == "matchify.org") {
+        if (window.location.protocol != "https:") {
+          let u = new URL(window.location.href);
+          u.protocol = "https:";
+          window.location.replace(u.href);
+          return;
+        }
+      } else {
+        window.location.replace("https://matchify.org");
+      }
+    })();
   }
 }
 </script>
