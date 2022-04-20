@@ -6,7 +6,7 @@
         v-model="activeItem"
         open
         reduce
-        :hoverExpand="!isMobile"
+        :hoverExpand="!isMobileData.isMobile"
         >
         <template #logo>
           <router-link to="/">
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { isMobile } from "@/data/isMobile";
+import isMobileData from "@/data/isMobile";
 import userData from "@/data/user";
 import MatchifyIcon from "./components/MatchifyIcon.vue";
 
@@ -86,7 +86,7 @@ export default {
   data() {
     return {
       activeItem: "home",
-      isMobile,
+      isMobileData,
       userData
     }
   },
