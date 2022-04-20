@@ -65,6 +65,11 @@ a {
   padding-left: 2px !important;
 }
 
+.vs-sidebar-content[style="width: 260px;"] .vs-avatar-content {
+  width: 100px !important;
+  height: 100px;
+}
+
 @keyframes marquee {
   0% {
     transform: translate(-100%, 0);

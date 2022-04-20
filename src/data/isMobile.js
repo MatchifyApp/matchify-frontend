@@ -1,1 +1,5 @@
-export const isMobile = matchMedia("screen and (max-width: 800px)").matches;
+export default {
+  get isMobile() {
+    return matchMedia("screen and (max-width: 1100px)").matches;
+  }
+};

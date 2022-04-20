@@ -1,70 +1,30 @@
 <template>
   <div v-if="userData.currentUser" class="me-page">
-    <div class="cards">
-      <router-link :to="`/user/${userData.currentUser.userId}`">
-        <vs-card>
-          <template #title>
-            <h3 style="display:flex;">
-              <span>{{userData.currentUser.userTag.split("#")[0]}}</span>
-              <span class="half-opacity">
-                #{{userData.currentUser.userTag.split("#")[1]}}
-              </span>
-            </h3>
-          </template>
-          <template #img>
-            <img :src="`${getUserAvatar(userData.currentUser)}?size=512`" alt="">
-          </template>
-          <template #text>
-            <p>
-              View your account!
-            </p>
-          </template>
-          <template #interactions>
-            <vs-button v-if="userData.currentUser.currentTrack" :to="`/track/${userData.currentUser.currentTrack.trackId}`" color="spotify" class="currentTrack-btn" >
-              <i class="ri-spotify-fill"></i>
-              {{userData.currentUser.currentTrack.trackTitle}}
-            </vs-button>
-          </template>
-        </vs-card>
+    <div class="sidebar">
+      <router-link :to="`/user/${userData.currentUser.userId}`" class="item">
+        Current User
+        <vs-avatar v-if="userData.currentUser">
+          <img :src="getUserAvatar(userData.currentUser)" alt="">
+        </vs-avatar>
       </router-link>
-      <router-link v-if="userData.currentUser.currentTrack" to="/me/current">
-        <vs-card>
-          <template #title>
-            <h3>
-              Current Track
-            </h3>
-          </template>
-          <template #img>
-            <img :src="`https://i.scdn.co/image/${userData.currentUser.currentTrack.trackAlbumArtwork}`" alt="">
-          </template>
-          <template #text>
-            <p>
-              View same time listeners with you!
-            </p>
-          </template>
-        </vs-card>
+      <router-link :to="`/me/current`" class="item">
+        Current Track
+        <vs-avatar v-if="userData.currentUser.currentTrack">
+          <img :src="`https://i.scdn.co/image/${userData.currentUser.currentTrack.trackAlbumArtwork}`" alt="">
+        </vs-avatar>
       </router-link>
-      <router-link v-if="randomMatch" :to="`/user/${randomMatch.userId}`">
-        <vs-card>
-          <template #title>
-            <h3>
-              Matches
-            </h3>
-          </template>
-          <template #img>
-            <img :src="getUserAvatar(randomMatch)" alt="">
-          </template>
-          <template #text>
-            <p>
-              Click here to see your random match!
-            </p>
-          </template>
-        </vs-card>
+      <router-link :to="`/user/${(randomMatch || {}).userId}`" class="item" :class="{'disabled': !randomMatch}">
+        Random Match
+        <vs-avatar v-if="randomMatch">
+          <img :src="getUserAvatar(randomMatch)" alt="">
+        </vs-avatar>
       </router-link>
-    </div>
-    <div class="buttons">
-      <vs-button color="danger" flat @click="logout">Logout</vs-button>
-      <vs-button color="danger" flat @click="blockMe">Disable My Account</vs-button>
+      <span @click="logout" class="item danger">
+        Logout
+      </span>
+      <span @click="blockMe" class="item danger">
+        Disable Account
+      </span>
     </div>
   </div>
 </template>
@@ -75,8 +35,6 @@ import router from "@/router";
 import socket from "@/socket";
 import { getUserAvatar } from "@/utils/getUserAvatar";
 import Vue from "vue";
-
-
 
 export default {
   data() {
@@ -130,40 +88,41 @@ export default {
 
 <style lang="scss">
   .me-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    padding: 50px;
     flex-direction: column;
+    padding-top: 16px;
+    padding-right: 16px;
+    .sidebar {
+      width: 100%;
+      margin-bottom: 32px;
+      .item {
+        padding: 0 16px;
+        height: 70px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        user-select: none;
+        min-width: max-content;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;        
 
-    .cards {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+        &.disabled {
+          pointer-events: none;
+          opacity: 0.35;
+        }
 
-      .currentTrack-btn {
-        font-size: 0.8rem;
-        i {
-          font-size: 1.2rem;
-          margin-right: 4px;
+        &:hover:not(.disabled), &.active {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        &.danger {
+          color: tomato;
+          border-bottom: 1px solid rgba(255, 99, 71, 0.25);
+          &:hover:not(.disabled), &.active {
+            background-color: rgba(255, 99, 71, 0.15);
+          }
         }
       }
-
-      .vs-card {
-        margin: 8px;
-        max-width: 300px;
-      }
     }
 
-    .buttons {
-      margin-top: 8px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-    }
-    
   }
 </style>
