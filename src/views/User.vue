@@ -2,7 +2,7 @@
   <div v-if="user" class="user-page">
     <div class="banner" :style="user.userBanner ? `--img: url('https://cdn.discordapp.com/banners/${user.userId}/${user.userBanner}.${user.userBanner.startsWith('a_') ? 'gif' : 'png'}?size=4096');` : ``"></div>
     <div class="icon-name-container">
-      <div class="icon" :style="`background-image: url('${getUserAvatar(user)}?size=4096');`"></div>
+      <div class="icon" :class="{'premium': user.userPremiumUntil > Date.now()}" :style="`background-image: url('${getUserAvatar(user)}?size=4096');`"></div>
       <div class="name-controls-container">
         <div class="name">
           <h3 class="name-text">
@@ -236,6 +236,11 @@ export default {
       background-size: cover;
       margin-top: calc(var(--icon-size) / 2 * -1);
       border-radius: calc(var(--icon-size) / 6);
+
+      &.premium {
+        border: 4px solid gold;
+        filter: drop-shadow(0px 0px 16px gold);
+      }
     }
 
     .name-controls-container {

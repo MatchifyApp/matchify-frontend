@@ -1,5 +1,5 @@
 <template>
-  <vs-card class="item">
+  <vs-card class="item" :class="{'premium': data.userPremiumUntil > Date.now()}">
     <template #title>
       <div class="title">
         <div class="name">
@@ -53,6 +53,12 @@ export default {
   padding: 8px;
   --card-width: 200px;
   width: 200px;
+
+  &.premium {
+    .vs-card {
+      box-shadow: 0px 0px 0px 4px gold, 0px 0px 16px 4px gold !important;
+    }
+  }
 
   .img {
     width: 200px;
