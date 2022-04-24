@@ -27,7 +27,7 @@
         <div class="lists">
           <item-list title="Listened Before">
             <UserListItem v-for="(user, i) in listenedBefore" :user="user" :show-count="true" :key="i"></UserListItem>
-            <static-list-item>
+            <static-list-item v-if="listenedBefore.length >= 20">
               <vs-button size="xl" shadow color="dark" @click="loadMoreBefore" :loading="beforeLoading">Load More</vs-button>
             </static-list-item>
           </item-list>
@@ -35,6 +35,7 @@
             <UserListItem v-for="(user, i) in track.trackListeners" :user="user" :key="i"></UserListItem>
           </item-list>
         </div>
+        <Comments type="track" :id="trackId"></Comments>
       </div>
       <div class="right">
         <RightSidebar type="track" :information="track" />
@@ -54,6 +55,7 @@ import RightSidebar from "@/components/sidebar/RightSidebar.vue";
 import StaticListItem from "@/components/list/StaticListItem.vue";
 import { getUserAvatar } from "@/utils/getUserAvatar";
 import UserListItem from "@/components/list/UserListItem.vue";
+import Comments from "@/components/comment/Comments.vue";
 
 export default {
   data() {
@@ -99,10 +101,10 @@ export default {
   components: {
     LikeButton,
     ItemList,
-    // UserListItem,
     StaticListItem,
     RightSidebar,
-    UserListItem
+    UserListItem,
+    Comments
 },
   async created() {
     this.trackId = this.xTrackId || this.$route.params.trackId;

@@ -4,5 +4,12 @@ module.exports = defineConfig({
   productionSourceMap: false,
   devServer: {
     allowedHosts: "all"
+  },
+  pwa: {
+    name: 'Matchify',
+    themeColor: "#195aff",
+    msTileColor: "#195aff",
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: 'black'
   }
 })

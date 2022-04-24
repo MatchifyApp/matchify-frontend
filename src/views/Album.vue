@@ -27,7 +27,7 @@
         <div class="lists">
           <item-list title="Listened Before">
             <UserListItem v-for="(user, i) in listenedBefore" :user="user" :show-count="true" :key="i"></UserListItem>
-            <static-list-item>
+            <static-list-item v-if="listenedBefore.length >= 20">
               <vs-button size="xl" shadow color="dark" @click="loadMoreBefore" :loading="beforeLoading">Load More</vs-button>
             </static-list-item>
           </item-list>
@@ -35,6 +35,7 @@
             <UserListItem v-for="(user, i) in album.albumListeners" :user="user" :key="i"></UserListItem>
           </item-list>
         </div>
+        <Comments type="album" :id="albumId"></Comments>
       </div>
       <div class="right-side-bar">
         <RightSidebar type="album" :information="album" />
@@ -52,6 +53,7 @@ import StaticListItem from "@/components/list/StaticListItem.vue";
 import RightSidebar from "@/components/sidebar/RightSidebar.vue";
 import { getUserAvatar } from "@/utils/getUserAvatar";
 import UserListItem from "@/components/list/UserListItem.vue";
+import Comments from "@/components/comment/Comments.vue";
 
 export default {
   data() {
@@ -104,7 +106,8 @@ export default {
     ItemList,
     StaticListItem,
     RightSidebar,
-    UserListItem
+    UserListItem,
+    Comments
 },
   async created() {
     this.albumId = this.xAlbumId || this.$route.params.albumId;

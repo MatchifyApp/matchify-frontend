@@ -14,6 +14,9 @@ export default {
   get isPremium() {
     return ((this.currentUser?.userPremiumUntil || 0) > Date.now());
   },
+  get isAdmin() { 
+    return !!(this.currentUser?.flags?.includes("ADMIN") || this.currentUser?.flags?.includes("OWNER"));
+  },
   async loginUser(token) {
     if (this.currentUser) throw "Already logged in";
     let loginResponse = await new Promise(r => socket.emit("auth:login", { token: token }, r));

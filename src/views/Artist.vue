@@ -23,7 +23,7 @@
           <div class="row">
             <item-list title="Listened Before">
               <UserListItem v-for="(user, i) in listenedBefore" :user="user" :show-count="true" :key="i"></UserListItem>
-              <static-list-item>
+              <static-list-item v-if="listenedBefore.length >= 20">
                 <vs-button size="xl" shadow color="dark" @click="loadMoreBefore" :loading="beforeLoading">Load More</vs-button>
               </static-list-item>
             </item-list>
@@ -40,6 +40,7 @@
             </item-list>
           </div>
         </div>
+        <Comments type="artist" :id="artistId"></Comments>
       </div>
       <div class="right">
         <RightSidebar type="artist" :information="artist" />
@@ -60,6 +61,7 @@ import { getUserAvatar } from "@/utils/getUserAvatar";
 import UserListItem from "@/components/list/UserListItem.vue";
 import TrackListItem from "@/components/list/TrackListItem.vue";
 import AlbumListItem from "../components/list/AlbumListItem.vue";
+import Comments from "@/components/comment/Comments.vue";
 
 export default {
   data() {
@@ -112,7 +114,8 @@ export default {
     RightSidebar,
     UserListItem,
     TrackListItem,
-    AlbumListItem
+    AlbumListItem,
+    Comments
 },
   async created() {
     this.artistId = this.xArtistId || this.$route.params.artistId;

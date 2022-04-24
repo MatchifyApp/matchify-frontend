@@ -40,7 +40,7 @@
           <div class="row">
             <item-list title="History">
               <track-list-item v-for="(track, i) in trackHistory" :track="track" :current-track="user.currentTrack" :show-progress="i === 0" :key="i"></track-list-item>
-              <static-list-item>
+              <static-list-item v-if="trackHistory.length >= 20">
                 <vs-button size="xl" shadow color="dark" @click="loadMoreHistory" :loading="historyLoading">Load More</vs-button>
               </static-list-item>
             </item-list>
@@ -49,6 +49,7 @@
             </item-list>
           </div>
         </div>
+        <Comments type="user" :id="userId"></Comments>
       </div>
       <div class="right-side-bar">
         <RightSidebar type="user" :information="user" />
@@ -67,6 +68,7 @@ import StaticListItem from "@/components/list/StaticListItem.vue";
 import RightSidebar from "@/components/sidebar/RightSidebar.vue";
 import { getUserAvatar } from "@/utils/getUserAvatar";
 import GuildMemberListItem from "@/components/list/GuildMemberListItem.vue";
+import Comments from "@/components/comment/Comments.vue";
 
 export default {
   data() {
@@ -79,9 +81,9 @@ export default {
       likeState: false,
       trackHistory: [],
       guildUsers: [],
-      extraOffset: 0,
+      extraHistoryOffset: 0,
       historyPage: 0,
-      historyLoading: false
+      historyLoading: false,
     }
   },
   props: {
@@ -105,13 +107,13 @@ export default {
       this.historyLoading = true;
       socket.emit("user:get:history", {
         userId: this.userId,
-        offset: this.extraOffset + (PAGE_SIZE * this.historyPage++),
+        offset: this.extraHistoryOffset + (PAGE_SIZE * this.historyPage++),
         limit: PAGE_SIZE
       }, ({ data }) => {
         this.historyLoading = false;
         this.trackHistory.push(...data);
       })
-    }
+    },
   },
   computed: {
     genres() {
@@ -124,8 +126,9 @@ export default {
     TrackListItem,
     StaticListItem,
     RightSidebar,
-    GuildMemberListItem
-  },
+    GuildMemberListItem,
+    Comments
+},
   async created() {
     this.userId = this.xUserId || this.$route.params.userId;
 
@@ -133,6 +136,7 @@ export default {
 
     await userData.awaitCurrentUser();
     this.loadMoreHistory();
+    
     if (userData.currentUser) {
       socket.emit("user:current-user:like:get", { userId: this.userId }, ({ data }) => {
         this.likeState = data;
@@ -159,7 +163,7 @@ export default {
               trackAt: user.currentTrack.trackAt,
               trackDuration: user.currentTrack.trackDuration
             });
-            this.extraOffset++;
+            this.extraHistoryOffset++;
           }
         }
         if (notif) {
@@ -183,7 +187,7 @@ export default {
               trackAt: data.user.currentTrack.trackAt,
               trackDuration: data.user.currentTrack.trackDuration
             });
-            this.extraOffset++;
+            this.extraHistoryOffset++;
           }
         }
         if (notif) {
@@ -373,6 +377,8 @@ export default {
           }
         }
       }
+
+      
     }
   }
 

@@ -63,11 +63,9 @@ a {
 
 .vs-sidebar__footer {
   padding-left: 2px !important;
-}
-
-.vs-sidebar-content[style="width: 260px;"] .vs-avatar-content {
-  width: 100px !important;
-  height: 100px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes marquee {

@@ -13,6 +13,12 @@
             <matchify-icon :size="4"></matchify-icon>
           </router-link>
         </template>
+        <vs-sidebar-item id="me" :to="userData.currentUser ? '/me' : '/login'">
+          <template #icon>
+            <i class="ri-user-line"></i>
+          </template>
+          Me
+        </vs-sidebar-item>
         <vs-sidebar-item id="home" to="/">
           <template #icon>
             <i class="ri-home-2-line"></i>
@@ -58,14 +64,6 @@
           </template>
           Top 50
         </vs-sidebar-item> -->
-        <template #footer>
-          <router-link :to="userData.currentUser ? '/me' : '/login'">
-            <vs-avatar>
-              <img v-if="userData.currentUser" :src="`https://cdn.discordapp.com/avatars/${userData.currentUser.userId}/${userData.currentUser.userAvatar}.png?size=128`" alt="">
-              <i v-if="!userData.currentUser" class="ri-login-circle-line"></i>
-            </vs-avatar>
-          </router-link>
-        </template>
       </vs-sidebar>
 
     </nav>
@@ -79,7 +77,7 @@
 import isMobileData from "@/data/isMobile";
 import userData from "@/data/user";
 import MatchifyIcon from "./components/MatchifyIcon.vue";
-
+import { getUserAvatar } from "./utils/getUserAvatar";
 
 export default {
   components: { MatchifyIcon },
@@ -89,6 +87,9 @@ export default {
       isMobileData,
       userData
     }
+  },
+  methods: {
+    getUserAvatar
   },
   created() {
     (()=>{

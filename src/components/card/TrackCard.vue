@@ -1,5 +1,5 @@
 <template>
-  <vs-card class="item">
+  <vs-card class="track-card">
     <template #title>
       <div class="title">
         <div class="name">
@@ -50,7 +50,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.item {
+.track-card {
   padding: 8px;
   --card-width: 200px;
   width: 200px;
