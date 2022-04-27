@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  say-hello:
+  close-session:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -19,11 +19,35 @@ jobs:
             - "13:bb:be:5d:53:d0:38:82:0b:eb:42:51:a2:00:77:ca"
       - run:
           name: "Main"
-          command:  ssh -o "StrictHostKeyChecking no" root@$SERVER_IP "cd Matchify2; git pull; sudo kill -9 `sudo lsof -t -i:80` sudo node ."
+          command: | 
+            ssh -o "StrictHostKeyChecking no" root@$SERVER_IP 
+            sudo kill -9 `sudo lsof -t -i:80`
+       
+  clone-and-run:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: cimg/base:stable
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "13:bb:be:5d:53:d0:38:82:0b:eb:42:51:a2:00:77:ca"
+      - run:
+          name: "Main"
+          command: | 
+            ssh -o "StrictHostKeyChecking no" root@$SERVER_IP 
+            cd Matchify2
+            git pull
+            tmux \
+            new-session  "sudo node ."
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   say-hello-workflow:
     jobs:
-      - say-hello
+      - close-session
+      - clone-and-run
