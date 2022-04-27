@@ -14,9 +14,17 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "13:bb:be:5d:53:d0:38:82:0b:eb:42:51:a2:00:77:ca"
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Main"
+          command: |
+            ssh root@$SERVER_IP
+            cd Matchify2
+            git pull
+            sudo kill -9 $(sudo lsof -t -i:80)
+            sudo node .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
