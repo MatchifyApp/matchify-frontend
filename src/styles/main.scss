@@ -68,6 +68,11 @@ a {
   justify-content: center;
 }
 
+.vs-tooltip {
+  --vs-color: 30, 30, 30;
+  --vs-background: 255, 255, 255;
+}
+
 @keyframes marquee {
   0% {
     transform: translate(-100%, 0);

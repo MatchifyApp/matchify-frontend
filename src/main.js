@@ -5,6 +5,7 @@ import router from './router'
 import Vuesax from 'vuesax'
 
 import 'vuesax/dist/vuesax.css'
+import "@/notifications";
 
 Vue.config.productionTip = false;
 

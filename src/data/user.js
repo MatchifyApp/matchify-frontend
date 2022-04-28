@@ -4,6 +4,13 @@ import chillout from "chillout";
 export default {
   currentUser: null,
   userId: null,
+  async getOptions() {
+    let { data } = await socket.emit("current-user:client-options:get");
+    return data;
+  },
+  async setOptions(options) {
+    await socket.emit("current-user:client-options:set", { options });
+  },
   async awaitCurrentUser() {
     if (localStorage.getItem("token")) {
       await chillout.waitUntil(() => this.currentUser ? chillout.StopIteration : null);
@@ -40,5 +47,6 @@ export default {
     socket.emit("auth:logout");
     this.currentUser = null;
     this.userId = null;
+    window.location.reload();
   }
 };
